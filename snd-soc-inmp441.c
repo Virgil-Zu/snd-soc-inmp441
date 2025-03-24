@@ -28,7 +28,7 @@
  };
  
  static const struct snd_soc_component_driver inmp441_component_driver = {
-     .idle_bias_on       = 1, // keep power
+     .idle_bias_on		= 1, // keep power
      .use_pmdown_time	= 1,
      .endianness			= 1,
  };
@@ -36,9 +36,9 @@
  static int inmp441_platform_probe(struct platform_device *pdev)
  {
      return devm_snd_soc_register_component(&pdev->dev,
-                           &inmp441_component_driver,
-                           &inmp441_dai_driver,
-                           1);
+                         &inmp441_component_driver,
+                         &inmp441_dai_driver,
+                         1);
  }
  
  #ifdef CONFIG_OF
