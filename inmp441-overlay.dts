@@ -1,0 +1,47 @@
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "brcm,bcm2835";
+
+	/* Enable I2S */
+	fragment@0 {
+		target = <&i2s_clk_producer>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@1 {
+		target-path = "/";
+		__overlay__ {
+			inmp441: inmp441 {
+				compatible = "invensense,inmp441";
+				#sound-dai-cells = <0>;
+				status = "okay";
+			};
+		};
+	};
+
+	/* Soundcard connecting I2S to ADC */
+	fragment@2 {
+		target = <&sound>;
+		__overlay__ {
+			compatible = "simple-audio-card";
+			simple-audio-card,name = "INMP441";
+			simple-audio-card,format = "i2s";
+			dai-tdm-slot-num = <1>;
+			dai-tdm-slot-width = <24>;
+			status = "okay";
+            
+			simple-audio-card,cpu {
+				sound-dai = <&i2s_clk_producer>;
+			};
+
+			simple-audio-card,codec {
+				sound-dai = <&inmp441>;
+			};
+		};
+	};
+};
