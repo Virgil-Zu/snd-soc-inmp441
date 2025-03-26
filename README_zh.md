@@ -2,106 +2,106 @@
 
 InvenSense INMP441 I2S Codec Driver on Raspberry Pi。
 
-The INMP441 is a digital audio input module that outputs digital signals directly through its pins, requiring only a simple codec component implementation.
+INMP441是一个数字音频输入模块，引脚直接输出数字信号，所以只要简单实现编码器组件即可。
 
-To facilitate simultaneous use with digital output modules, the driver is implemented as `simple-audio-card` component.
+为了方便和数字输出模块同时使用，驱动作为一个 `simple-audio-card` 声卡组件
 
 PS:
 
-- Successfully tested on Raspberry Pi Model B Rev 2
-- Future plans include adding support for SD pin mode and LED pins
+- 已经在Raspberry Pi Model B Rev 2测试通过
 
-## Compiling the Driver
+- 后续计划加入SD引脚模式和LED引脚支持
 
-### Environment 
+## 编译驱动
 
-This refers to compilation on the Raspberry Pi itself, excluding cross-platform compilation
+### 环境准备
+
+这里指在树莓派上编译，不涉及跨平台编译部分
 
 ```sh
-apt install build-essential bc bison flex libssl-dev make
+apt install build-essential git bc bison flex libssl-dev make
 apt install raspberrypi-kernel-headers
 ```
 
-### Compile
+### 编译
 
-In the directory containing `snd-soc-inmp441.c`, execute the command:
+在 `snd-soc-inmp441.c `目录，执行命令 
 
-````
+````sh
 make clean && make
 ````
 
 
 
-### Installation
+### 安装
 
-In the source directory , execute the command:
+在 `snd-soc-inmp441.c `目录，执行命令 
 ```
 make install
 ```
 
-Following Raspberry Pi requirements, the compiled `snd-soc-inmp441.ko` will be compressed into `snd-soc-inmp441.ko.xz` and placed in the `/usr/lib/modules/$(shell uname -r)/kernel/sound/soc/codecs/` directory. The `depmod` command will then be executed to update `modules.alias`, `modules.dep`, etc. Finally, `modinfo` will be displayed to confirm the module is functioning correctly.
+按照树莓派要求，将编译好的`snd-soc-inmp441.ko` 压缩成 `snd-soc-inmp441.ko.xz`,放在 /usr/lib/modules/$(shell uname -r)/kernel/sound/soc/codecs/ 目录下，并执行 depmod 构建 更新modules.alias, modules.dep 等，最后会显示modinfo，表示模块正常
 
 
 
-## Compiling the Device Tree
+## 编译设备树
 
-### Environment 
+### 环境准备
 
 ```
 apt install device-tree-compiler
 ```
 
-### Compile
+### 编译
 
-#### Using INMP441 Alone
+#### 单独使用inmp441
 
 ```sh
 dtc -@ -I dts -O dtb -o /boot/overlays/inmp441.dtbo inmp441-overlay.dts
 ```
 
-#### Using INMP441 with MAX98357A
+#### 和max98357a一起使用
 
 ```sh
 dtc -@ -I dts -O dtb -o /boot/overlays/inmp441-max98357a.dtbo inmp441-max98357a-overlay.dts
 ```
 
-Note: Warnings may appear here, which can be safely ignored (the official Raspberry Pi source code also includes these warnings):
+注意这里可能有警告提示，请忽略，raspberry官方源码也有这个警告
 
-```
+```sh
 Warning (unit_address_vs_reg): /fragment@2/__overlay__/simple-audio-card,dai-link@0: node has a unit name, but no reg or ranges property
 Warning (unit_address_vs_reg): /fragment@2/__overlay__/simple-audio-card,dai-link@1: node has a unit name, but no reg or ranges property
 ```
 
-### Installation
+### 安装
 
-Modify `/boot/firmware/config.txt` and add the following content:
+修改 `/boot/firmware/config.txt`，添加以下内容
 
-#### Using INMP441 Alone
+#### 单独使用inmp441
 
 ```txt
 dtoverlay=inmp441
 ```
 
-#### Using INMP441 with MAX98357A
+#### 和max98357a一起使用
 
-```
+```sh
 dtoverlay=inmp441-max98357a
 ```
 
-`reboot`Reboot to apply changes:
+`reboot`重启生效
 
-## Testing
+## 测试
 
-1. Check driver existence `/sys/devices/platform/soc/subsystem/drivers`
+1. 检查驱动存在 `/sys/devices/platform/soc/subsystem/drivers`
 
-2. Check device existence `/sys/devices/platform/soc/subsystem/devices`
+2. 检查设备存在 `/sys/devices/platform/soc/subsystem/devices`
 
-3. Check device status `/proc/device-tree/inmp441/status`
+3. 检查设备状态 `/proc/device-tree/inmp441/status`
 
-4. List input/output devices `aplay -l`, `arecord -l`，(both should include INMP441)
+4. 列举输入输出设备 `aplay -l`, `arecord -l`，都包含inmp441
 
-5. Test recording (note: arecord outputs card 1, device 1, use parameters `hw:1,1`):
-
+5. 测试录音，注意arecord输出card 1，device 1, 参数使用 `hw:1,1`
 
 ```sh
 ~# ls /sys/devices/platform/soc/subsystem/drivers | grep inmp441
