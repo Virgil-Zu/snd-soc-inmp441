@@ -31,8 +31,6 @@
 			compatible = "simple-audio-card";
 			simple-audio-card,name = "INMP441";
 			simple-audio-card,format = "i2s";
-			dai-tdm-slot-num = <1>;
-			dai-tdm-slot-width = <24>;
 			status = "okay";
             
 			simple-audio-card,cpu {
