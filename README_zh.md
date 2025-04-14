@@ -8,7 +8,7 @@ INMP441是一个数字音频输入模块，引脚直接输出数字信号，所�
 
 PS:
 
-- 已经在Raspberry Pi Model B Rev 2测试通过
+- 已在Raspberry Pi Model B Rev 2测试通过
 
 - 后续计划加入SD引脚模式和LED引脚支持
 
@@ -16,7 +16,7 @@ PS:
 
 ### 环境准备
 
-这里指在树莓派上编译，不涉及跨平台编译部分
+这里只在树莓派环境中编译，不涉及跨平台编译
 
 ```sh
 apt install build-essential git bc bison flex libssl-dev make
@@ -40,7 +40,7 @@ make clean && make
 make install
 ```
 
-按照树莓派要求，将编译好的`snd-soc-inmp441.ko` 压缩成 `snd-soc-inmp441.ko.xz`,放在 /usr/lib/modules/$(shell uname -r)/kernel/sound/soc/codecs/ 目录下，并执行 depmod 构建 更新modules.alias, modules.dep 等，最后会显示modinfo，表示模块正常
+按照 Raspberry pi OS 要求，将编译好的`snd-soc-inmp441.ko` 压缩成 `snd-soc-inmp441.ko.xz`,放在` /usr/lib/modules/$(shell uname -r)/kernel/sound/soc/codecs/` 目录下，并执行` depmod` 构建 更新`modules.alias`, `modules.dep` 等，最后会显示 `modinfo`，表示模块正常
 
 
 

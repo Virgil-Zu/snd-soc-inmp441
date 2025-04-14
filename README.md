@@ -1,71 +1,75 @@
 # snd-soc-inmp441
 
-InvenSense INMP441 I2S Codec Driver on Raspberry Pi。
+InvenSense INMP441 I2S Codec Driver for Raspberry Pi.
 
-The INMP441 is a digital audio input module that outputs digital signals directly through its pins, requiring only a simple codec component implementation.
+The INMP441 is a digital microphone module that outputs digital signals directly through its pins, so we only need to implement a simple codec component.
 
-To facilitate simultaneous use with digital output modules, the driver is implemented as `simple-audio-card` component.
+For easier integration with digital output modules, this driver is implemented as a `simple-audio-card` component.
 
-PS:
+Note:
 
-- Successfully tested on Raspberry Pi Model B Rev 2
-- Future plans include adding support for SD pin mode and LED pins
+- Tested and working on Raspberry Pi Model B Rev 2
+- Future updates may include SD pin mode and LED pin support
 
-## Compiling the Driver
+## Building the Driver
 
-### Environment 
+### Prerequisites
 
-This refers to compilation on the Raspberry Pi itself, excluding cross-platform compilation
+We're building directly on the Raspberry Pi (no cross-compilation).
 
 ```sh
-apt install build-essential bc bison flex libssl-dev make
+apt install build-essential git bc bison flex libssl-dev make
 apt install raspberrypi-kernel-headers
 ```
 
-### Compile
+### Compilation
 
-In the directory containing `snd-soc-inmp441.c`, execute the command:
+In the directory containing `snd-soc-inmp441.c`, run:
 
 ````
 make clean && make
 ````
 
-
-
 ### Installation
 
-In the source directory , execute the command:
+In the same directory, execute:
+
 ```
 make install
 ```
 
-Following Raspberry Pi requirements, the compiled `snd-soc-inmp441.ko` will be compressed into `snd-soc-inmp441.ko.xz` and placed in the `/usr/lib/modules/$(shell uname -r)/kernel/sound/soc/codecs/` directory. The `depmod` command will then be executed to update `modules.alias`, `modules.dep`, etc. Finally, `modinfo` will be displayed to confirm the module is functioning correctly.
+This will:
+
+1. Compress the compiled `snd-soc-inmp441.ko` into `snd-soc-inmp441.ko.xz`
+2. Place it in `/usr/lib/modules/$(uname -r)/kernel/sound/soc/codecs/`
+3. Run `depmod` to update module dependencies `modules.alias`, `modules.dep` 
+4. Run `modinfo` output to confirm successful installation
 
 
 
-## Compiling the Device Tree
+## Device Tree Compilation
 
-### Environment 
+### Prerequisites
 
 ```
 apt install device-tree-compiler
 ```
 
-### Compile
+### Compilation Options
 
-#### Using INMP441 Alone
+#### Standalone INMP441 Configuration
 
 ```sh
 dtc -@ -I dts -O dtb -o /boot/overlays/inmp441.dtbo inmp441-overlay.dts
 ```
 
-#### Using INMP441 with MAX98357A
+#### Combined INMP441 + MAX98357A Configuration
 
 ```sh
 dtc -@ -I dts -O dtb -o /boot/overlays/inmp441-max98357a.dtbo inmp441-max98357a-overlay.dts
 ```
 
-Note: Warnings may appear here, which can be safely ignored (the official Raspberry Pi source code also includes these warnings):
+Note: You may see warnings like these (safe to ignore, same warnings appear in official Raspberry Pi sources):
 
 ```
 Warning (unit_address_vs_reg): /fragment@2/__overlay__/simple-audio-card,dai-link@0: node has a unit name, but no reg or ranges property
@@ -74,33 +78,31 @@ Warning (unit_address_vs_reg): /fragment@2/__overlay__/simple-audio-card,dai-lin
 
 ### Installation
 
-Modify `/boot/firmware/config.txt` and add the following content:
+Edit `/boot/firmware/config.txt`:
 
-#### Using INMP441 Alone
+#### Standalone Configuration
 
 ```txt
 dtoverlay=inmp441
 ```
 
-#### Using INMP441 with MAX98357A
+#### Combined Configuration
 
 ```
 dtoverlay=inmp441-max98357a
 ```
 
-`reboot`Reboot to apply changes:
+Reboot to apply changes.
 
 ## Testing
 
-1. Check driver existence `/sys/devices/platform/soc/subsystem/drivers`
+1. Verify driver exists in `/sys/devices/platform/soc/subsystem/drivers`
+2. Check device appears in `/sys/devices/platform/soc/subsystem/devices`
+3. Verify device status: `/proc/device-tree/inmp441/status`
+4. List audio devices: `aplay -l`, `arecord -l` (both should show inmp441)
+5. Test recording (note: use `hw:1,1` as INMP441 typically appears as card 1, device 1)
 
-2. Check device existence `/sys/devices/platform/soc/subsystem/devices`
-
-3. Check device status `/proc/device-tree/inmp441/status`
-
-4. List input/output devices `aplay -l`, `arecord -l`，(both should include INMP441)
-
-5. Test recording (note: arecord outputs card 1, device 1, use parameters `hw:1,1`):
+Example test sequence:
 
 
 ```sh
